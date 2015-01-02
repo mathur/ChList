@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>ChList</title>
+
     <style>
       body {
         min-width: 357px;
@@ -18,9 +19,10 @@
     </style>
 
     <script src="popup.js"></script>
+
   </head>
-  <body onload="init();">
-    <form type="post" onsubmit="addTodo(); return false;">
+  <body>
+    <form type="post" id="todoform">
       <input type="text" id="todo" name="todo" placeholder="What do you need to do?" style="width: 200px;" />
       <input type="submit" value="Add Todo Item"/>
     </form>

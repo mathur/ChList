@@ -1,79 +1,126 @@
-      var chlist = {};
-      chlist.webdb = {};
-      chlist.webdb.db = null;
+window.addEventListener("load", init);
+
+window.onload = function() {
+    var form = document.getElementById('todoform');
+    form.onsubmit = function() {
+        addTodo();
+        return false;
+    }
+}
+
+var chlist = {};
+chlist.indexedDB = {};
       
-      chlist.webdb.open = function() {
-        var dbSize = 5 * 1024 * 1024; // 5MB
-        chlist.webdb.db = openDatabase("Todo", "1.0", "Todo manager", dbSize);
-      }
+chlist.indexedDB.db = null;
+
+chlist.indexedDB.open = function() {
+  var version = 1;
+  var request = indexedDB.open("todos", version);
+
+  request.onupgradeneeded = function(e) {
+    var db = e.target.result;
+
+    e.target.transaction.onerror = chlist.indexedDB.onerror;
+
+    if(db.objectStoreNames.contains("todo")) {
+      db.deleteObjectStore("todo");
+    }
+
+    var store = db.createObjectStore("todo",
+      {keyPath: "timeStamp"});
+  };
+
+  request.onsuccess = function(e) {
+    chlist.indexedDB.db = e.target.result;
+    chlist.indexedDB.getAllTodoItems();
+  };
+
+  request.onerror = chlist.indexedDB.onerror;
+};
+
+chlist.indexedDB.addTodo = function(todoText) {
+  var db = chlist.indexedDB.db;
+  var trans = db.transaction(["todo"], "readwrite");
+  var store = trans.objectStore("todo");
+  var request = store.put({
+    "text": todoText,
+    "timeStamp" : new Date().getTime()
+  });
+
+  trans.oncomplete = function(e) {
+    chlist.indexedDB.getAllTodoItems();
+  };
+
+  request.onerror = function(e) {
+    console.log(e.value);
+  };
+};
       
-      chlist.webdb.createTable = function() {
-        var db = chlist.webdb.db;
-        db.transaction(function(tx) {
-          tx.executeSql("CREATE TABLE IF NOT EXISTS todo(ID INTEGER PRIMARY KEY ASC, todo TEXT, added_on DATETIME)", []);
-        });
-      }
+chlist.indexedDB.getAllTodoItems = function() {
+  var todos = document.getElementById("todoItems");
+  todos.innerHTML = "";
+
+  var db = chlist.indexedDB.db;
+  var trans = db.transaction(["todo"], "readwrite");
+  var store = trans.objectStore("todo");
+
+  var keyRange = IDBKeyRange.lowerBound(0);
+  var cursorRequest = store.openCursor(keyRange);
+
+  cursorRequest.onsuccess = function(e) {
+    var result = e.target.result;
+    if(!!result == false)
+      return;
+
+    renderTodo(result.value);
+    result.continue();
+  };
+
+  cursorRequest.onerror = chlist.indexedDB.onerror;
+};
       
-      chlist.webdb.addTodo = function(todoText) {
-        var db = chlist.webdb.db;
-        db.transaction(function(tx){
-          var addedOn = new Date();
-          tx.executeSql("INSERT INTO todo(todo, added_on) VALUES (?,?)",
-              [todoText, addedOn],
-              chlist.webdb.onSuccess,
-              chlist.webdb.onError);
-         });
-      }
+chlist.indexedDB.deleteTodo = function(id) {
+  var db = chlist.indexedDB.db;
+  var trans = db.transaction(["todo"], "readwrite");
+  var store = trans.objectStore("todo");
+
+  var request = store.delete(id);
+
+  trans.oncomplete = function(e) {
+    chlist.indexedDB.getAllTodoItems();
+  };
+
+  request.onerror = function(e) {
+    console.log(e);
+  };
+};
       
-      chlist.webdb.onError = function(tx, e) {
-        alert("There has been an error: " + e.message);
-      }
+function renderTodo(row) {
+  var todos = document.getElementById("todoItems");
+  var li = document.createElement("li");
+  var a = document.createElement("a");
+  var t = document.createTextNode("");
+  t.data = row.text;
+
+  a.addEventListener("click", function(e) {
+    chlist.indexedDB.deleteTodo(row.text);
+  });
+
+  a.textContent = " [Delete]";
+  li.appendChild(t);
+  li.appendChild(a);
+  todos.appendChild(li);
+}
+
+function init() {
+  chlist.indexedDB.open();
+}
+
+window.addEventListener("DOMContentLoaded", init, false);
       
-      chlist.webdb.onSuccess = function(tx, r) {
-        // re-render the data.
-        chlist.webdb.getAllTodoItems(loadTodoItems);
-      }
-      
-      
-      chlist.webdb.getAllTodoItems = function(renderFunc) {
-        var db = chlist.webdb.db;
-        db.transaction(function(tx) {
-          tx.executeSql("SELECT * FROM todo", [], renderFunc,
-              chlist.webdb.onError);
-        });
-      }
-      
-      chlist.webdb.deleteTodo = function(id) {
-        var db = chlist.webdb.db;
-        db.transaction(function(tx){
-          tx.executeSql("DELETE FROM todo WHERE ID=?", [id],
-              chlist.webdb.onSuccess,
-              chlist.webdb.onError);
-          });
-      }
-      
-      function loadTodoItems(tx, rs) {
-        var rowOutput = "";
-        var todoItems = document.getElementById("todoItems");
-        for (var i=0; i < rs.rows.length; i++) {
-          rowOutput += renderTodo(rs.rows.item(i));
-        }
-      
-        todoItems.innerHTML = rowOutput;
-      }
-      
-      function renderTodo(row) {
-        return "<li>" + row.todo  + " [<a href='javascript:void(0);'  onclick='chlist.webdb.deleteTodo(" + row.ID +");'>Delete</a>]</li>";
-      }
-      
-      function init() {
-        chlist.webdb.open();
-        chlist.webdb.createTable();
-        chlist.webdb.getAllTodoItems(loadTodoItems);
-      }
-      
-      function addTodo() {
-        var todo = document.getElementById("todo");
-        chlist.webdb.addTodo(todo.value);
-        todo.value = "";
-      }
+function addTodo() {
+  var todo = document.getElementById('todo');
+
+  chlist.indexedDB.addTodo(todo.value);
+  todo.value = '';
+}
