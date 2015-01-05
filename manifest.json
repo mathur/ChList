@@ -5,9 +5,6 @@
   "description": "This chrome extension adds a simple Todo list applet to Chrome",
   "version": "1.0",
 
-  "permissions": [
-  ],
-
   "browser_action": {
     "default_icon": "icon.png",
     "default_popup": "popup.html"
