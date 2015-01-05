@@ -1,31 +1,78 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>ChList</title>
+	<head>
+		<style type="text/css">
+		body {
+			width:300px;
+			margin: 5% auto;
+			overflow: hidden;
+			color: #222;
+		}
+		
+		#content {
+			width:94%;
+			margin:2% auto;
+		}
 
-    <style>
-      body {
-        min-width: 357px;
-        overflow-x: hidden;
-        color: #222;
-        font: 14px Arial;
-      }
-      
-      body a {
-        color: #3D5C9D;
-        text-decoration: none;
-      }
-    </style>
+		label span {
+		display: block;
+		font-size: 14px;
+		}
 
-    <script src="popup.js"></script>
+		ul {
+		list-style-type: none;
+		margin: 10px 0 0;
+		padding: 0;
+		max-height: 392px;
+		overflow-y: auto;
+		}
 
-  </head>
-  <body>
-    <form type="post" id="todoform">
-      <input type="text" id="todo" name="todo" placeholder="What do you need to do?" style="width: 200px;" />
-      <input type="submit" value="Add Todo Item"/>
-    </form>
-    <ul id="todoItems">
-    </ul>
-  </body>
+		li {
+		font-size: 15px;
+		line-height: 22px;
+		margin:2%;
+		padding:2.5%;
+		clear:both;
+		border-bottom:1px solid #d9d9d9;
+		}
+
+		li.removing span {
+		text-decoration: line-through;
+		}
+
+		.check {
+		color: #080;
+		background:url( data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAVCAQAAAADHm0dAAAAAmJLR0QA/4ePzL8AAAAJcEhZcwAAAEgAAABIAEbJaz4AAAAJdnBBZwAAABUAAAAVAHF8yDUAAACISURBVCjPxVIxDsMgDDzarPAlspIhn+3A2jF7fuIPXAcixTgtTaJUvZMtQGcLzjhiL267lT+SdvagJwA83VbqaEQapoALI0mCJRcyrmtQX6AHuFS/B+u+BZ6evu7J+llTyJJCloQsKTTNepi4RjqbOD2tygF4zZYD4yB3tZXx42C/4e//9YD0BQyQXZp6UF8uAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAABJRU5ErkJggg==);
+		display: block;
+		float: right;
+		height: 22px;
+		text-decoration: none;
+		width: 22px;
+		border-radius:3px;
+		opacity:0.3;
+		margin:0 2px;
+		}
+		
+		.label {
+			color: white;
+			padding: 1px 6px;
+			border-radius:8px;
+			background:#682F3B;
+		}
+
+		</style>
+		<script type="text/javascript" src="jquery.js"></script>
+		<script type="text/javascript" src="jquery.ui.js"></script>
+		<script type="text/javascript" src="script.js"></script>
+		<script type="text/javascript" src="jquery.cookie.js"></script>
+		<script src="replacetext.js"></script>
+	</head>
+	<body>
+		<div id="content">
+			<label class="input" for="add-task">
+				<input placeholder="Add a ToDo" type="text" id="add-task" />
+			</label>
+		<ul id="tasks"></ul>
+	</div>
+</body>
 </html>
